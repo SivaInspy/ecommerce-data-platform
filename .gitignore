@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Spark
+spark-warehouse/
+
+# Airflow
+airflow/logs/
+airflow/plugins/__pycache__/
+
+# Logs
+*.log
+
+# Environment Variables
+.env
+
+# PySpark
+.metastore_db/
+
+# Notebook Checkpoints
+.ipynb_checkpoints/
+
+# Build
+build/
+dist/
+
+# Python Packaging
+*.egg-info/
+
+# Local Data
+data/raw/
