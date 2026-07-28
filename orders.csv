@@ -1,0 +1,6 @@
+order_id,customer_id,product,category,price
+1,101,iPhone 16,Mobile,79999
+2,102,MacBook Air,Laptop,115000
+3,103,Samsung TV,Electronics,65000
+4,104,AirPods Pro,Accessories,24999
+5,105,Sony Camera,Camera,55000
