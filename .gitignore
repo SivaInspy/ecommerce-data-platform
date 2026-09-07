@@ -1,46 +1,31 @@
-# Python
+# Python virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
 
-# Virtual Environment
-venv/
-.venv/
+# Spark output
+spark/bronze/
+spark/silver/
+spark/gold/
+spark/checkpoint/
+
+# Logs
+*.log
+logs/
 
 # IDE
 .vscode/
 .idea/
 
-# OS Files
+# OS files
 .DS_Store
 Thumbs.db
 
-# Spark
-spark-warehouse/
-
-# Airflow
-airflow/logs/
-airflow/plugins/__pycache__/
-
-# Logs
-*.log
-
-# Environment Variables
-.env
-
-# PySpark
-.metastore_db/
-
-# Notebook Checkpoints
-.ipynb_checkpoints/
-
-# Build
-build/
-dist/
-
-# Python Packaging
+# Python packaging
 *.egg-info/
-
-# Local Data
-data/raw/
+dist/
+build/
