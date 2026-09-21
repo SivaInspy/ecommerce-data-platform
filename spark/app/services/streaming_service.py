@@ -1,7 +1,7 @@
 from app.consumers.kafka_consumer import read_stream
 from app.parsers.order_parser import parse_orders
 
-from config.settings import CHECKPOINT_LOCATION
+from config.settings import BRONZE_CHECKPOINT_LOCATION
 from config.settings import BRONZE_PATH
 
 
@@ -22,7 +22,7 @@ def start_stream():
         )
         .option(
             "checkpointLocation",
-            CHECKPOINT_LOCATION
+            BRONZE_CHECKPOINT_LOCATION
         )
         .start()
     )

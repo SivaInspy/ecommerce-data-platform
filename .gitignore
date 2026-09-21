@@ -12,6 +12,7 @@ spark/bronze/
 spark/silver/
 spark/gold/
 spark/checkpoint/
+spark/quarantine/
 
 # Logs
 *.log
@@ -29,3 +30,8 @@ Thumbs.db
 *.egg-info/
 dist/
 build/
+
+# Checkpoint directories
+spark/checkpoint_bronze/
+spark/checkpoint_silver/
+spark/checkpoint_gold/
