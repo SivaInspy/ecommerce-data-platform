@@ -1,6 +1,52 @@
-                         REAL-TIME E-COMMERCE DATA PLATFORM
+# Real-Time E-Commerce Data Platform
 
-### Architecture Overview
+## Overview
+
+This project demonstrates a production-style real-time data engineering pipeline using Kafka, Apache Spark Structured Streaming, Docker, Airflow, and Parquet.
+
+---
+
+## Low-Level Architecture
+
+Producer (Python)
+        │
+        ▼
+Apache Kafka
+        │
+        ▼
+Spark Structured Streaming
+        │
+        ▼
+Bronze Layer (Parquet)
+        │
+        ▼
+Silver Layer
+        │
+        ▼
+Gold Layer
+        │
+        ▼
+Power BI Dashboard
+
+---
+
+## Tech Stack
+
+- Python
+- Apache Kafka
+- Apache Spark
+- Docker
+- Apache Airflow
+- Parquet
+- GitHub Actions
+
+---
+
+## Current Status
+
+🚧 Project is under active development.
+
+## Architecture Overview
 
 The platform implements a real-time e-commerce data pipeline using
 Apache Kafka and Spark Structured Streaming.
@@ -27,10 +73,9 @@ Apache Kafka and Spark Structured Streaming.
    automated testing, logging and Spark checkpointing support
    reliable and maintainable pipeline operations.
 
-```markdown
 ## 🏗️ High-Level Architecture
 
-
+```markdown
                          REAL-TIME E-COMMERCE DATA PLATFORM
 
  ┌──────────────────────┐
