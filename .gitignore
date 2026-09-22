@@ -35,3 +35,9 @@ build/
 spark/checkpoint_bronze/
 spark/checkpoint_silver/
 spark/checkpoint_gold/
+
+# Airflow
+airflow/logs/
+airflow/airflow.db
+airflow/standalone_admin_password.txt
+airflow/__pycache__/

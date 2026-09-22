@@ -14,8 +14,8 @@ SILVER_CHECKPOINT_LOCATION = "checkpoint_silver"
 
 BRONZE_PATH = "bronze"
 
-SILVER_PATH = "silver"
+SILVER_PATH = "silver/data"
 
-QUARANTINE_PATH = "quarantine"
+QUARANTINE_PATH = "quarantine/data"
 
 LOG_LEVEL = "ERROR"

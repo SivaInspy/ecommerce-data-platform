@@ -1,0 +1,40 @@
+services:
+
+  spark-gold:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: ecommerce-spark:latest
+
+    container_name: ecommerce-spark-gold
+
+    working_dir: /opt/spark-app
+
+    environment:
+      PYTHONPATH: /opt/spark-app
+
+    volumes:
+      - type: bind
+        source: ./bronze
+        target: /opt/spark-app/bronze
+
+      - type: bind
+        source: ./silver
+        target: /opt/spark-app/silver
+
+      - type: bind
+        source: ./gold
+        target: /opt/spark-app/gold
+
+      - type: bind
+        source: ./quarantine
+        target: /opt/spark-app/quarantine
+
+      - type: bind
+        source: ./checkpoint
+        target: /opt/spark-app/checkpoint
+
+      - type: bind
+        source: ./checkpoint_silver
+        target: /opt/spark-app/checkpoint_silver
