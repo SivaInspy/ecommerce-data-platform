@@ -1,5 +1,3 @@
-```markdown
-
                          REAL-TIME E-COMMERCE DATA PLATFORM
 
 ### Architecture Overview
@@ -29,6 +27,7 @@ Apache Kafka and Spark Structured Streaming.
    automated testing, logging and Spark checkpointing support
    reliable and maintainable pipeline operations.
 
+```markdown
 ## 🏗️ High-Level Architecture
 
 
