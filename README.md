@@ -46,6 +46,8 @@ Power BI Dashboard
 
 🚧 Project is under active development.
 
+---
+
 ## Architecture Overview
 
 The platform implements a real-time e-commerce data pipeline using
@@ -72,6 +74,8 @@ Apache Kafka and Spark Structured Streaming.
 7. **Orchestration & Operations** – Airflow, Docker, GitHub Actions,
    automated testing, logging and Spark checkpointing support
    reliable and maintainable pipeline operations.
+
+---
 
 ## 🏗️ High-Level Architecture
 
