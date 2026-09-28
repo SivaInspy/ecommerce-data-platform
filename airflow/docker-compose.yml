@@ -70,13 +70,15 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
 
+      # Path to the Spark project on the Windows host
+      SPARK_PROJECT_PATH: "C:/Users/dsiva/OneDrive/Projects/ecommerce-data-platform/spark"
+
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
 
-      # Docker socket
-      # Allows DockerOperator to communicate with Docker Desktop.
+      # Allow Airflow DockerOperator to communicate with Docker Desktop
       - /var/run/docker.sock:/var/run/docker.sock
 
     command: webserver
@@ -100,13 +102,15 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
 
+      # Path to the Spark project on the Windows host
+      SPARK_PROJECT_PATH: "C:/Users/dsiva/OneDrive/Projects/ecommerce-data-platform/spark"
+
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
 
-      # Docker socket
-      # Allows DockerOperator to communicate with Docker Desktop.
+      # Allow Airflow DockerOperator to communicate with Docker Desktop
       - /var/run/docker.sock:/var/run/docker.sock
 
     command: scheduler

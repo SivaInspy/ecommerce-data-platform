@@ -15,26 +15,33 @@ services:
       PYTHONPATH: /opt/spark-app
 
     volumes:
+
+      # Bronze data
       - type: bind
         source: ./bronze
         target: /opt/spark-app/bronze
 
+      # Silver data
       - type: bind
         source: ./silver
         target: /opt/spark-app/silver
 
+      # Gold data
       - type: bind
         source: ./gold
         target: /opt/spark-app/gold
 
+      # Quarantine data
       - type: bind
         source: ./quarantine
         target: /opt/spark-app/quarantine
 
+      # Bronze/Spark streaming checkpoint
       - type: bind
         source: ./checkpoint
         target: /opt/spark-app/checkpoint
 
+      # Silver checkpoint
       - type: bind
         source: ./checkpoint_silver
         target: /opt/spark-app/checkpoint_silver
