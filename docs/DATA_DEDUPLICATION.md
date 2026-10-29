@@ -459,3 +459,29 @@ because it:
 - Keeps the implementation simple and deterministic for the current dataset
 
 For a production implementation, the preferred enhancement is to introduce a source-generated unique event identifier or a formally defined business key.
+
+# Silver deduplication behavior
+
+## Current implementation
+
+After quality validation and timestamp conversion, `spark/app/transformers/order_transformer.py` calls:
+
+```python
+.dropDuplicates()
+```
+
+Spark therefore removes rows whose complete set of columns is identical. It retains rows that share an `order_id` but differ in any other column. For example, two records for the same order ID with different customers or prices remain separate.
+
+This is a conservative choice for the current sample contract: `order_id` is not guaranteed unique, and the schema does not contain a unique event ID. It is not a general production idempotency strategy. It will not identify semantically repeated events if fields vary (for example, event metadata or formatting), and it cannot decide which update wins.
+
+## Quality rules are separate
+
+`validate_orders` routes records with the first detected issue to quarantine. Conditions checked, in order, are missing `order_id`, missing `customer_id`, missing `price`, price <= 0, and missing `order_time`. The error field is named `error_reason`. Invalid rows are deduplicated by `(order_id, error_reason)` in the current implementation, which can collapse distinct invalid rows sharing those two values. Valid rows are exact-row deduplicated later in the Silver transformation.
+
+## Production contract to define
+
+Before changing the key, establish the source-system meaning of an order and an event. Prefer a stable source-generated `event_id` and deduplicate on that identifier. If the source has no event ID, document a composite key with the owner of the data. Define how corrections, repeated deliveries, late arrivals, and conflicting payloads should be handled. For streaming deduplication, also define watermark/retention bounds and checkpoint recovery expectations.
+
+## How to inspect current data
+
+From `spark/`, inspect Bronze duplicate counts with `python inspect_duplicates.py`. Run the Silver batch to produce the current valid, quarantined, and exact-distinct records. Counts depend on the actual Bronze files; older fixed sample counts in project notes are historical observations, not expected values for every run.

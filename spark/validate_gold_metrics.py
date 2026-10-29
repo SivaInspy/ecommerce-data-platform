@@ -1,3 +1,5 @@
+"""Compare overall Gold metrics with metrics recalculated directly from Silver."""
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import count
 from pyspark.sql.functions import sum
@@ -8,6 +10,7 @@ from app.schemas.order_schema import silver_order_schema
 from config.settings import SILVER_PATH
 
 
+# Gold dataset directories are relative to the Spark working directory.
 GOLD_PATH = "gold"
 
 
@@ -43,6 +46,7 @@ print(f"Silver record count: {silver_df.count()}")
 
 print("\nCalculating expected metrics from Silver...")
 
+# Recalculate the expected totals from the Silver source of record.
 expected = (
     silver_df
     .agg(
@@ -59,6 +63,7 @@ expected = (
 
 print("Reading Gold overall metrics...")
 
+# Load the single-row Gold aggregate produced by the Gold batch job.
 gold = (
     spark.read
     .format("parquet")

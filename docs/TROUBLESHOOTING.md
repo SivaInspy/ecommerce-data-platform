@@ -575,3 +575,55 @@ The following components have been implemented and validated:
 - Exact-row deduplication strategy
 
 The next stage of the project is to integrate the Gold datasets with the reporting/visualization layer and continue with CI/CD and project documentation.
+
+
+# Troubleshooting
+
+Use the component's working directory when running scripts; several input and output paths are relative to the current directory.
+
+## Kafka does not start or producer cannot connect
+
+- From the repository root, check `docker compose ps` and `docker compose logs kafka zookeeper`.
+- The producer is configured for the host listener, normally `localhost:9092`. A client in a container should use the internal Compose address `kafka:29092` if it shares the network.
+- Verify the broker and topic values in `producer/config/settings.py` and Spark's `spark/config/settings.py` agree.
+- Wait for the broker to become healthy before starting the producer. The Compose file declares service ordering, not a Kafka readiness health check.
+
+## Spark reports that Kafka data source is missing
+
+The Structured Streaming source requires the matching Spark SQL Kafka connector. Check `spark/app/session/spark_session.py` and confirm the artifact's Spark and Scala versions match the installed PySpark distribution. The batch jobs do not need the Kafka connector. Connector download may require network access the first time the stream starts.
+
+## Spark cannot find input data or writes output in an unexpected place
+
+Run Spark entry points from `spark/` as documented in the root README. Settings and job paths are relative: Bronze reads from `bronze/`, Silver writes to `silver/data`, Gold writes to `gold/`, and exports go to `bi_export/`. Confirm those directories are present and contain the expected Parquet data. In PowerShell, use `Set-Location spark` before running jobs.
+
+## Stream appears idle
+
+The stream waits continuously for Kafka events. Run `python producer.py` from the repository root to send the five sample records, and check that Spark and producer use the same broker and topic. Inspect Kafka/Spark logs. The consumer does not explicitly set `startingOffsets`; Spark's Kafka source default applies when creating a query without a checkpoint. Bronze progress is tied to the checkpoint in `spark/config/settings.py`.
+
+## Silver quarantines records or outputs fewer rows
+
+Inspect the `error_reason` column in `quarantine/data/`. The validator reports only its first failing condition, in order: missing order ID, customer ID, price, non-positive price, then missing order time. Valid rows are exact-row deduplicated, so identical records collapse, but rows sharing an order ID with different attributes remain. Counts vary with input files. The batch overwrites Silver; quarantine is only overwritten when the current run has invalid rows, so remove or archive stale quarantine output deliberately if you need a clean-run snapshot.
+
+## Gold validation fails
+
+Run the stages in sequence from `spark/`: `python run_silver_batch.py`, `python run_gold.py`, then `python validate_gold_metrics.py`. Confirm Silver and Gold were produced from the same source snapshot. Validation compares order count and revenue exactly and average order value within 0.01. A validation failure exits with an assertion error; inspect its expected and actual values.
+
+## Airflow task fails to launch Spark container
+
+- Build the image expected by the DAG: from `spark/`, run `docker build -t ecommerce-spark:latest .`.
+- Check that Docker Desktop is running and the Airflow services can access `/var/run/docker.sock`.
+- Set `SPARK_PROJECT_PATH` in `airflow/docker-compose.yml` to the actual host path to `spark/`; bind mount paths are interpreted by the Docker daemon.
+- Ensure the host folders used by the mounts exist and contain Bronze data before triggering Silver.
+- Review Airflow task logs and `docker compose logs` from `airflow/`.
+
+## Airflow cannot connect to Spark job dependencies
+
+The Airflow DAG currently runs batch jobs only. It mounts storage directories, but its checkpoint mount is named `checkpoint`, while Spark settings name the Bronze streaming checkpoint `checkpoint_bronze`; align this before mounting/running the stream. The Spark config's Kafka broker is `localhost:9092`, which refers to the Spark container itself when run in Docker. Use a reachable broker address if a container job needs Kafka.
+
+## Airflow Compose initialization or dependency issues
+
+Use the Airflow Docker image and provider pins in `airflow/Dockerfile` and `airflow/requirements.txt`. If you change the Airflow version, use its matching official constraints and a compatible Docker provider. Check Postgres health and the `airflow-init` service logs before restarting webserver or scheduler.
+
+## Resetting local data or checkpoints
+
+Bronze files, Silver/Gold outputs, and Spark checkpoints are local state. Do not delete checkpoints while a stream is running. Deleting a checkpoint starts a new query history and can cause replay or gaps depending on Kafka offsets. Back up any data worth keeping before cleanup. For Compose-managed Kafka state, inspect volumes before removing them; `docker compose down -v` removes persisted broker state.

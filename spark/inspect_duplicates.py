@@ -1,3 +1,5 @@
+"""Inspect Bronze quality results and repeated order IDs for analysis."""
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 from pyspark.sql.functions import count
@@ -7,6 +9,7 @@ from app.schemas.order_schema import order_schema
 from app.transformers.data_quality import validate_orders
 
 
+# Glob all streaming Parquet part files in Bronze.
 BRONZE_PATH = "bronze/*.parquet"
 
 
@@ -63,6 +66,8 @@ invalid_df.orderBy("order_id").show(
 
 print("\n===== DUPLICATE ORDER IDS =====")
 
+# Identify IDs with multiple valid input rows; this is diagnostic, not the
+# exact-row deduplication operation used by the Silver transformer.
 duplicate_ids = (
     valid_df
     .groupBy("order_id")

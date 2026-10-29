@@ -503,6 +503,84 @@ ecommerce-data-platform/
 
 ---
 
+## Repository map
+
+| Path | Purpose |
+|---|---|
+| `producer.py` | Fixed sample event publisher using `kafka-python` |
+| `producer/` | Reserved for a modular producer implementation; source files are currently empty |
+| `spark/app/` | Spark schemas, Kafka consumer/parser, quality rules, transformations, and services |
+| `spark/run*.py`, `spark/*gold*.py` | Streaming, Silver, Gold, export, inspection, and validation entry points |
+| `spark/config/settings.py` | Kafka topic, paths, and application configuration |
+| `airflow/` | Airflow image, Compose setup, and orchestration DAG |
+| `docker-compose.yml` | Local Kafka and ZooKeeper services |
+| `powerbi/` | Power BI report and preview image |
+| `spark/bi_export/` | Checked-in sample BI CSVs and export notes |
+| `docs/` | Architecture, operations, troubleshooting, and data semantics |
+| `data/`, `bronze/`, `silver/`, `artifacts/` | Data/artifact folders; runtime outputs are generally created under `spark/` |
+
+---
+
+## Prerequisites
+
+- Docker Desktop with Docker Compose
+- Python compatible with the pinned dependencies in each component
+- Java runtime required by the installed PySpark distribution
+- Power BI Desktop to open the `.pbix` report
+
+Install dependencies in the component you plan to run. The root `requirements.txt` is a convenience list; producer, Spark, and Airflow have separate requirement files. Airflow is intended to run in Docker rather than in the root Python environment.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r producer\requirements.txt
+```
+
+For Spark, install `spark/requirements.txt` in a Spark-capable environment. The stream's Kafka connector is configured in `spark/app/session/spark_session.py`; verify it matches the installed Spark/Scala versions if you change PySpark.
+
+---
+
+## Run locally (Windows PowerShell)
+
+1. Start Kafka and ZooKeeper from the repository root:
+
+   ```powershell
+   docker compose up -d
+   docker compose ps
+   ```
+
+2. Start the sample producer in another terminal:
+
+   ```powershell
+   python producer.py
+   ```
+
+   It sends five fixed order events to `orders` at `localhost:9092`, sleeping two seconds between events. Start the Spark stream before sending them; `producer/` itself is an empty package scaffold.
+
+3. Start the Spark Bronze stream in another terminal:
+
+   ```powershell
+   Set-Location spark
+   python run.py
+   ```
+
+   Leave it running while messages are produced. Stop with Ctrl+C. Bronze output and the streaming checkpoint are relative to `spark/`.
+
+4. In `spark/`, run the batch layers in order:
+
+   ```powershell
+   python run_silver_batch.py
+   python run_gold.py
+   python validate_gold_metrics.py
+   python export_gold_to_csv.py
+   ```
+
+5. Import the four CSV files from `spark/bi_export/` into Power BI, or open `powerbi/ecommerce-data-platform.pbix` and refresh its sources as needed.
+
+For a single Dockerized Spark job, build from `spark/` with `docker build -t ecommerce-spark:latest .`, then run it with appropriate host data mounts. The Dockerfile's default command is `run_gold.py`, which requires Silver data to be mounted or present.
+
+---
+
 # Running the Project
 
 ## Start Kafka
@@ -691,6 +769,58 @@ This allows the pipeline to preserve problematic records for investigation.
 Gold metrics are independently recalculated from Silver and compared with the generated Gold dataset.
 
 This helps detect transformation or aggregation errors.
+
+---
+
+## Data flow
+
+```text
+External Kafka producer -> Kafka (orders) -> Spark Structured Streaming -> spark/bronze/
+  -> Silver batch -> spark/silver/data/ + spark/quarantine/data/
+  -> Gold batch -> spark/gold/{overall_metrics,revenue_by_category,revenue_by_city,sales_trend}/
+  -> CSV export -> spark/bi_export/ -> Power BI
+```
+
+The stream writes parsed order columns to Bronze in append mode. Silver validates the Bronze records, quarantines invalid rows, converts `order_time` to a timestamp, removes exact duplicate rows, and overwrites its outputs on each batch run. Gold aggregates Silver records. Airflow's `ecommerce_data_pipeline` DAG runs Silver, Gold, and Gold metric validation in sequence using DockerOperator.
+
+---
+
+## Airflow
+
+Start the separate Airflow Compose project from `airflow/`:
+
+```powershell
+Set-Location airflow
+docker compose up --build
+```
+
+The web UI is at `http://localhost:8080`. The Compose file initializes an `admin` user with the development password `admin`; change it before exposing this local setup beyond a trusted machine. Enable and trigger the `ecommerce_data_pipeline` DAG. It calls `run_silver_batch.py`, `run_gold.py`, and `validate_gold_metrics.py` inside `ecommerce-spark:latest` containers.
+
+Before running the DAG, build the Spark image and set `SPARK_PROJECT_PATH` in `airflow/docker-compose.yml` to the host path of this repo's `spark` directory. The DAG bind-mounts its Bronze, Silver, Gold, quarantine, and checkpoint directories. Airflow needs access to the Docker socket. The Spark Kafka settings use `localhost:9092`, which works for host-run Spark; a Spark container needs a broker address reachable from that container. See [Airflow operations](airflow/README.md) and [troubleshooting](docs/TROUBLESHOOTING.md).
+
+---
+
+## Data contract and outputs
+
+Orders contain `order_id`, `customer_id`, `customer_name`, `city`, `product_id`, `product_name`, `category`, `price`, `payment_method`, and `order_time`. See [architecture and data contract](docs/ARCHITECTURE.md). Current quality rules require order ID, customer ID, price, and order time, and require price > 0. Invalid output includes `error_reason` values such as `MISSING_ORDER_ID`, `MISSING_CUSTOMER_ID`, `MISSING_PRICE`, `INVALID_PRICE`, and `MISSING_ORDER_TIME`.
+
+Gold datasets are `revenue_by_category`, `revenue_by_city`, `overall_metrics`, and `sales_trend`. CSV exports are generated from Gold and can be recreated with the command above. They are reporting snapshots, not the authoritative data. Historical sample metric counts in older notes can differ from a newly generated dataset; calculate metrics from the current Silver output.
+
+---
+
+## Documentation
+
+- [Documentation index](docs/README.md)
+- [Architecture and data contract](docs/ARCHITECTURE.md)
+- [Deduplication semantics](docs/DATA_DEDUPLICATION.md)
+- [Troubleshooting and known configuration constraints](docs/TROUBLESHOOTING.md)
+- [Producer](producer/README.md) · [Spark](spark/README.md) · [Airflow](airflow/README.md) · [Docker](docker/README.md) · [Power BI](powerbi/README.md)
+
+---
+
+## Current scope
+
+This repository is a local demonstration, not a production deployment. Kafka runs with a single broker and plaintext listeners; the pipeline uses local paths and overwrite batch outputs; no schema registry, event ID, automated deployment, or production secrets management is configured. See the docs for operating constraints and recommended next steps.
 
 ---
 

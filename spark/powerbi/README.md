@@ -31,3 +31,7 @@ Gold
 BI Export
   ↓
 Power BI
+
+# Power BI handoff
+
+Power BI assets are maintained in the repository-level `powerbi/` folder. Generate the four CSV sources in `spark/bi_export/` with `python export_gold_to_csv.py` from the Spark directory. See [`../../powerbi/README.md`](../../powerbi/README.md).

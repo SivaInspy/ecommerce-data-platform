@@ -24,3 +24,7 @@ Kafka → Bronze → Silver → Gold → BI Export → Power BI
 The BI Export layer should be regenerated from Gold whenever the pipeline is refreshed.
 
 It should not be manually edited.
+
+# BI export
+
+This folder contains CSV snapshots exported from the four Spark Gold Parquet datasets. Regenerate from `spark/` with `python export_gold_to_csv.py`. The job replaces each CSV file and writes a header; export output should not be edited manually. The Gold datasets remain the analytical source of truth. See [Power BI instructions](../../powerbi/README.md).

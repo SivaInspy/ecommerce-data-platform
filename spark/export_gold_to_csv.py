@@ -1,14 +1,18 @@
+"""Export Gold Parquet datasets as single-file CSVs for BI consumers."""
+
 import os
 import shutil
 
 from pyspark.sql import SparkSession
 
 
+# Paths are relative to the current working directory (normally ``spark/``).
 GOLD_PATH = "gold"
 EXPORT_PATH = "bi_export"
 
 
 def create_spark_session():
+    """Create the local Spark session used to read Gold datasets."""
     return (
         SparkSession.builder
         .appName("GoldToBIExport")
@@ -18,6 +22,16 @@ def create_spark_session():
 
 
 def export_dataset(spark, dataset_name, output_filename):
+    """Write one Gold dataset as a single headered CSV file.
+
+    Args:
+        spark: Active SparkSession used to read and write the dataset.
+        dataset_name: Directory name under ``GOLD_PATH``.
+        output_filename: Destination filename under ``EXPORT_PATH``.
+
+    Raises:
+        FileNotFoundError: If Spark did not produce a CSV part file.
+    """
     input_path = f"{GOLD_PATH}/{dataset_name}"
     temp_path = f"{EXPORT_PATH}/_{dataset_name}_temp"
     final_path = f"{EXPORT_PATH}/{output_filename}"
@@ -76,6 +90,7 @@ def export_dataset(spark, dataset_name, output_filename):
 
 
 def export_gold_datasets():
+    """Export all supported Gold datasets and stop the Spark session."""
     spark = create_spark_session()
     spark.sparkContext.setLogLevel("ERROR")
 

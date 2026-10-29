@@ -1,3 +1,5 @@
+"""Business aggregations that shape Silver orders into Gold datasets."""
+
 from pyspark.sql import DataFrame
 
 from pyspark.sql.functions import avg
@@ -7,6 +9,14 @@ from pyspark.sql.functions import to_date
 
 
 def revenue_by_category(df: DataFrame) -> DataFrame:
+    """Aggregate order count and revenue by product category.
+
+    Args:
+        df: Silver order DataFrame.
+
+    Returns:
+        DataFrame: Category, total revenue, and order count, sorted by revenue.
+    """
 
     return (
         df
@@ -20,6 +30,14 @@ def revenue_by_category(df: DataFrame) -> DataFrame:
 
 
 def revenue_by_city(df: DataFrame) -> DataFrame:
+    """Aggregate order count and revenue by city.
+
+    Args:
+        df: Silver order DataFrame.
+
+    Returns:
+        DataFrame: City, total revenue, and order count, sorted by revenue.
+    """
 
     return (
         df
@@ -33,6 +51,14 @@ def revenue_by_city(df: DataFrame) -> DataFrame:
 
 
 def overall_metrics(df: DataFrame) -> DataFrame:
+    """Calculate total orders, total revenue, and average order value.
+
+    Args:
+        df: Silver order DataFrame.
+
+    Returns:
+        DataFrame: A single-row DataFrame containing the overall metrics.
+    """
 
     return (
         df
@@ -45,6 +71,14 @@ def overall_metrics(df: DataFrame) -> DataFrame:
 
 
 def sales_trend(df: DataFrame) -> DataFrame:
+    """Aggregate order count and revenue by calendar date.
+
+    Args:
+        df: Silver order DataFrame with timestamp-typed ``order_time``.
+
+    Returns:
+        DataFrame: Date, total revenue, and order count, sorted by date.
+    """
 
     return (
         df

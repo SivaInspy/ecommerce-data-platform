@@ -1,3 +1,5 @@
+"""Airflow DAG that runs Silver, Gold, and Gold metric checks sequentially."""
+
 import os
 
 from datetime import datetime
@@ -7,9 +9,11 @@ from airflow.providers.docker.operators.docker import DockerOperator
 from docker.types import Mount
 
 
+# Docker image tag built from the repository's spark/ Dockerfile.
 SPARK_IMAGE = "ecommerce-spark:latest"
 
 
+# Host path must be visible to the Docker daemon for the bind mounts below.
 SPARK_PROJECT_PATH = os.environ.get(
     "SPARK_PROJECT_PATH",
     "C:/Users/dsiva/OneDrive/Projects/ecommerce-data-platform/spark"

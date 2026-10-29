@@ -1,6 +1,9 @@
+"""Command-line entry point for building Gold analytics."""
+
 from app.services.gold_service import start_gold_job
 
 def main():
+    """Run the Gold batch job."""
 
     print("Starting Gold Analytics Job...")
 

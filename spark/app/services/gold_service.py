@@ -1,3 +1,5 @@
+"""Batch job that materializes analytical Gold datasets from Silver orders."""
+
 from pyspark.sql import SparkSession
 
 from app.schemas.order_schema import silver_order_schema
@@ -10,10 +12,16 @@ from app.transformers.gold_transformer import sales_trend
 from config.settings import SILVER_PATH
 
 
+# Gold output root is relative to the Spark process working directory.
 GOLD_PATH = "gold"
 
 
 def start_gold_job():
+    """Read Silver orders, compute four aggregates, and overwrite Gold Parquet.
+
+    Creates category, city, overall-metric, and daily-trend datasets under
+    ``GOLD_PATH``. The Spark session is stopped after the writes complete.
+    """
 
     spark = (
         SparkSession.builder

@@ -1,3 +1,5 @@
+"""Bronze streaming query lifecycle."""
+
 from app.consumers.kafka_consumer import read_stream
 from app.parsers.order_parser import parse_orders
 
@@ -6,6 +8,11 @@ from config.settings import BRONZE_PATH
 
 
 def start_stream():
+    """Read Kafka orders, append parsed records to Bronze Parquet, and await shutdown.
+
+    The configured checkpoint stores query progress so the stream can resume after
+    a restart using the same checkpoint directory.
+    """
 
     kafka_df = read_stream()
 

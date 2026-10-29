@@ -1,5 +1,8 @@
+"""Print schemas, sample rows, and counts for each persisted Gold dataset."""
+
 from pyspark.sql import SparkSession
 
+# Gold dataset directories are relative to the current working directory.
 GOLD_PATH = "gold"
 
 spark = (
@@ -13,6 +16,11 @@ spark.sparkContext.setLogLevel("ERROR")
 
 
 def validate_dataset(name):
+    """Display one Gold dataset's schema, rows, and record count.
+
+    Args:
+        name: Dataset directory under ``GOLD_PATH``.
+    """
     path = f"{GOLD_PATH}/{name}"
 
     print("\n" + "=" * 60)

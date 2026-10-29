@@ -1,3 +1,5 @@
+"""Batch entry point for building Silver and quarantine Parquet outputs."""
+
 import os
 
 from pyspark.sql import SparkSession
@@ -10,11 +12,16 @@ from config.settings import SILVER_PATH
 from config.settings import QUARANTINE_PATH
 
 
-# Bronze streaming output contains multiple Parquet files.
+# Bronze streaming output contains multiple Parquet part files.
 BRONZE_PATH = "bronze/*.parquet"
 
 
 def start_silver_batch():
+    """Read Bronze files, validate and deduplicate orders, then overwrite outputs.
+
+    Valid orders replace ``SILVER_PATH``. Invalid rows replace the quarantine
+    output only when the current input contains invalid rows.
+    """
 
     spark = (
         SparkSession.builder

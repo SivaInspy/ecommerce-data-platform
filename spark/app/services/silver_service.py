@@ -1,3 +1,5 @@
+"""Silver streaming job that validates and persists each Bronze micro-batch."""
+
 from pyspark.sql import SparkSession
 
 from app.schemas.order_schema import order_schema
@@ -9,10 +11,17 @@ from config.settings import SILVER_PATH
 from config.settings import QUARANTINE_PATH
 
 
+# Source path is relative to the Spark process working directory.
 BRONZE_PATH = "bronze"
 
 
 def process_batch(batch_df, batch_id):
+    """Validate and append one streaming micro-batch to Silver/quarantine.
+
+    Args:
+        batch_df: The Bronze rows for the current micro-batch.
+        batch_id: Spark's monotonically assigned micro-batch identifier.
+    """
 
     print(f"Processing Silver batch: {batch_id}")
 
@@ -40,6 +49,10 @@ def process_batch(batch_df, batch_id):
 
 
 def start_silver_stream():
+    """Stream Parquet files from Bronze through ``process_batch`` until stopped.
+
+    The configured checkpoint tracks progress for this streaming query.
+    """
 
     spark = (
         SparkSession.builder

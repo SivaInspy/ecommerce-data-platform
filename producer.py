@@ -1,9 +1,12 @@
+"""Publish a small fixed sample of JSON order events to the Kafka topic."""
+
 import json
 import time
 
 from kafka import KafkaProducer
 
 
+# Host-side broker listener and topic consumed by Spark's Bronze stream.
 KAFKA_BOOTSTRAP_SERVERS = "localhost:9092"
 KAFKA_TOPIC = "orders"
 
@@ -14,6 +17,7 @@ producer = KafkaProducer(
 )
 
 
+# Fixed demonstration payloads; fields must match Spark's order_schema.
 orders = [
 
     {
