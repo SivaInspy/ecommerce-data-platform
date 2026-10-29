@@ -1,6 +1,6 @@
 """Command-line entry point for the Kafka-to-Bronze streaming job."""
 
-from app.services.streaming_service import start_stream
+from app.services.streaming_service import start_bronze_stream
 
 
 def main():
@@ -8,7 +8,7 @@ def main():
 
     print("Starting Spark Streaming Consumer...")
 
-    start_stream()
+    start_bronze_stream()
 
 
 if __name__ == "__main__":

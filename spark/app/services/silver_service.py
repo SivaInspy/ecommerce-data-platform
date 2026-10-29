@@ -15,22 +15,22 @@ from config.settings import QUARANTINE_PATH
 BRONZE_PATH = "bronze"
 
 
-def process_batch(batch_df, batch_id):
+def process_silver_batch(bronze_batch_df, micro_batch_id):
     """Validate and append one streaming micro-batch to Silver/quarantine.
 
     Args:
-        batch_df: The Bronze rows for the current micro-batch.
-        batch_id: Spark's monotonically assigned micro-batch identifier.
+        bronze_batch_df: Bronze rows for the current micro-batch.
+        micro_batch_id: Spark's monotonically assigned micro-batch identifier.
     """
 
-    print(f"Processing Silver batch: {batch_id}")
+    print(f"Processing Silver batch: {micro_batch_id}")
 
-    valid_df, invalid_df = validate_orders(batch_df)
+    valid_orders_df, invalid_orders_df = validate_orders(bronze_batch_df)
 
-    silver_df = transform_orders(valid_df)
+    silver_orders_df = transform_orders(valid_orders_df)
 
     (
-        silver_df
+        silver_orders_df
         .write
         .mode("append")
         .format("parquet")
@@ -38,18 +38,18 @@ def process_batch(batch_df, batch_id):
     )
 
     (
-        invalid_df
+        invalid_orders_df
         .write
         .mode("append")
         .format("parquet")
         .save(QUARANTINE_PATH)
     )
 
-    print(f"Completed Silver batch: {batch_id}")
+    print(f"Completed Silver batch: {micro_batch_id}")
 
 
 def start_silver_stream():
-    """Stream Parquet files from Bronze through ``process_batch`` until stopped.
+    """Stream Parquet files from Bronze through ``process_silver_batch`` until stopped.
 
     The configured checkpoint tracks progress for this streaming query.
     """
@@ -63,17 +63,17 @@ def start_silver_stream():
 
     spark.sparkContext.setLogLevel("ERROR")
 
-    bronze_df = (
+    bronze_orders_df = (
         spark.readStream
         .schema(order_schema)
         .format("parquet")
         .load(BRONZE_PATH)
     )
 
-    query = (
-        bronze_df
+    silver_streaming_query = (
+        bronze_orders_df
         .writeStream
-        .foreachBatch(process_batch)
+        .foreachBatch(process_silver_batch)
         .option(
             "checkpointLocation",
             SILVER_CHECKPOINT_LOCATION
@@ -81,4 +81,4 @@ def start_silver_stream():
         .start()
     )
 
-    query.awaitTermination()
+    silver_streaming_query.awaitTermination()

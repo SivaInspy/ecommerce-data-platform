@@ -47,7 +47,7 @@ print(f"Silver record count: {silver_df.count()}")
 print("\nCalculating expected metrics from Silver...")
 
 # Recalculate the expected totals from the Silver source of record.
-expected = (
+expected_metrics_df = (
     silver_df
     .agg(
         count("order_id").alias("total_orders"),
@@ -64,7 +64,7 @@ expected = (
 print("Reading Gold overall metrics...")
 
 # Load the single-row Gold aggregate produced by the Gold batch job.
-gold = (
+gold_metrics_df = (
     spark.read
     .format("parquet")
     .load(f"{GOLD_PATH}/overall_metrics")
@@ -76,28 +76,28 @@ gold = (
 # ---------------------------------------------------------
 
 print("\nExpected metrics from Silver:")
-expected.show(truncate=False)
+expected_metrics_df.show(truncate=False)
 
 print("Actual metrics from Gold:")
-gold.show(truncate=False)
+gold_metrics_df.show(truncate=False)
 
 
 # ---------------------------------------------------------
 # Collect metrics
 # ---------------------------------------------------------
 
-expected_values = expected.collect()[0]
-gold_values = gold.collect()[0]
+expected_metric_values = expected_metrics_df.collect()[0]
+gold_metric_values = gold_metrics_df.collect()[0]
 
 
-expected_orders = expected_values["total_orders"]
-gold_orders = gold_values["total_orders"]
+expected_orders = expected_metric_values["total_orders"]
+gold_orders = gold_metric_values["total_orders"]
 
-expected_revenue = expected_values["total_revenue"]
-gold_revenue = gold_values["total_revenue"]
+expected_revenue = expected_metric_values["total_revenue"]
+gold_revenue = gold_metric_values["total_revenue"]
 
-expected_aov = expected_values["average_order_value"]
-gold_aov = gold_values["average_order_value"]
+expected_aov = expected_metric_values["average_order_value"]
+gold_aov = gold_metric_values["average_order_value"]
 
 
 # ---------------------------------------------------------

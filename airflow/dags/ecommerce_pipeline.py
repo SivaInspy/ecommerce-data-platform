@@ -20,7 +20,7 @@ SPARK_PROJECT_PATH = os.environ.get(
 )
 
 
-spark_mounts = [
+spark_data_mounts = [
 
     Mount(
         source=f"{SPARK_PROJECT_PATH}/bronze",
@@ -93,7 +93,7 @@ with DAG(
 
         docker_url="unix:///var/run/docker.sock",
 
-        mounts=spark_mounts,
+        mounts=spark_data_mounts,
 
         auto_remove="success",
 
@@ -116,7 +116,7 @@ with DAG(
 
         docker_url="unix:///var/run/docker.sock",
 
-        mounts=spark_mounts,
+        mounts=spark_data_mounts,
 
         auto_remove="success",
 
@@ -139,7 +139,7 @@ with DAG(
 
         docker_url="unix:///var/run/docker.sock",
 
-        mounts=spark_mounts,
+        mounts=spark_data_mounts,
 
         auto_remove="success",
 

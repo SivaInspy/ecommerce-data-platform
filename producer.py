@@ -11,14 +11,14 @@ KAFKA_BOOTSTRAP_SERVERS = "localhost:9092"
 KAFKA_TOPIC = "orders"
 
 
-producer = KafkaProducer(
+kafka_producer = KafkaProducer(
     bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-    value_serializer=lambda value: json.dumps(value).encode("utf-8")
+    value_serializer=lambda order_event: json.dumps(order_event).encode("utf-8")
 )
 
 
 # Fixed demonstration payloads; fields must match Spark's order_schema.
-orders = [
+sample_order_events = [
 
     {
         "order_id": 1,
@@ -88,18 +88,18 @@ orders = [
 ]
 
 
-for order in orders:
+for order_event in sample_order_events:
 
-    producer.send(
+    kafka_producer.send(
         KAFKA_TOPIC,
-        value=order
+        value=order_event
     )
 
-    print(f"Sent: {order}")
+    print(f"Sent: {order_event}")
 
     time.sleep(2)
 
 
-producer.flush()
+kafka_producer.flush()
 
 print("All messages sent successfully.")

@@ -8,18 +8,18 @@ from pyspark.sql.functions import sum
 from pyspark.sql.functions import to_date
 
 
-def revenue_by_category(df: DataFrame) -> DataFrame:
+def revenue_by_category(orders_df: DataFrame) -> DataFrame:
     """Aggregate order count and revenue by product category.
 
     Args:
-        df: Silver order DataFrame.
+        orders_df: Silver order DataFrame.
 
     Returns:
         DataFrame: Category, total revenue, and order count, sorted by revenue.
     """
 
     return (
-        df
+        orders_df
         .groupBy("category")
         .agg(
             sum("price").alias("total_revenue"),
@@ -29,18 +29,18 @@ def revenue_by_category(df: DataFrame) -> DataFrame:
     )
 
 
-def revenue_by_city(df: DataFrame) -> DataFrame:
+def revenue_by_city(orders_df: DataFrame) -> DataFrame:
     """Aggregate order count and revenue by city.
 
     Args:
-        df: Silver order DataFrame.
+        orders_df: Silver order DataFrame.
 
     Returns:
         DataFrame: City, total revenue, and order count, sorted by revenue.
     """
 
     return (
-        df
+        orders_df
         .groupBy("city")
         .agg(
             sum("price").alias("total_revenue"),
@@ -50,18 +50,18 @@ def revenue_by_city(df: DataFrame) -> DataFrame:
     )
 
 
-def overall_metrics(df: DataFrame) -> DataFrame:
+def overall_metrics(orders_df: DataFrame) -> DataFrame:
     """Calculate total orders, total revenue, and average order value.
 
     Args:
-        df: Silver order DataFrame.
+        orders_df: Silver order DataFrame.
 
     Returns:
         DataFrame: A single-row DataFrame containing the overall metrics.
     """
 
     return (
-        df
+        orders_df
         .agg(
             count("order_id").alias("total_orders"),
             sum("price").alias("total_revenue"),
@@ -70,18 +70,18 @@ def overall_metrics(df: DataFrame) -> DataFrame:
     )
 
 
-def sales_trend(df: DataFrame) -> DataFrame:
+def sales_trend(orders_df: DataFrame) -> DataFrame:
     """Aggregate order count and revenue by calendar date.
 
     Args:
-        df: Silver order DataFrame with timestamp-typed ``order_time``.
+        orders_df: Silver order DataFrame with timestamp-typed ``order_time``.
 
     Returns:
         DataFrame: Date, total revenue, and order count, sorted by date.
     """
 
     return (
-        df
+        orders_df
         .withColumn(
             "order_date",
             to_date("order_time")

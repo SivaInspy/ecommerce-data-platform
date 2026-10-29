@@ -32,9 +32,9 @@ bronze_df = (
     .load(BRONZE_PATH)
 )
 
-bronze_count = bronze_df.count()
+bronze_record_count = bronze_df.count()
 
-print(f"Bronze records: {bronze_count}")
+print(f"Bronze records: {bronze_record_count}")
 
 
 print("\n===== BRONZE DATA =====")
@@ -47,18 +47,18 @@ bronze_df.orderBy("order_id").show(
 
 print("\n===== DATA QUALITY VALIDATION =====")
 
-valid_df, invalid_df = validate_orders(bronze_df)
+valid_orders_df, invalid_orders_df = validate_orders(bronze_df)
 
-valid_count = valid_df.count()
-invalid_count = invalid_df.count()
+valid_order_count = valid_orders_df.count()
+invalid_order_count = invalid_orders_df.count()
 
-print(f"Valid records: {valid_count}")
-print(f"Invalid records: {invalid_count}")
+print(f"Valid records: {valid_order_count}")
+print(f"Invalid records: {invalid_order_count}")
 
 
 print("\n===== INVALID RECORDS =====")
 
-invalid_df.orderBy("order_id").show(
+invalid_orders_df.orderBy("order_id").show(
     100,
     truncate=False
 )
@@ -69,7 +69,7 @@ print("\n===== DUPLICATE ORDER IDS =====")
 # Identify IDs with multiple valid input rows; this is diagnostic, not the
 # exact-row deduplication operation used by the Silver transformer.
 duplicate_ids = (
-    valid_df
+    valid_orders_df
     .groupBy("order_id")
     .agg(
         count("*").alias("record_count")
@@ -94,10 +94,10 @@ print(
 
 print("\n===== RECORDS REMOVED BY DEDUPLICATION =====")
 
-total_valid_records = valid_df.count()
+total_valid_records = valid_orders_df.count()
 
 distinct_order_ids = (
-    valid_df
+    valid_orders_df
     .select("order_id")
     .distinct()
     .count()
@@ -117,8 +117,8 @@ duplicate_order_id_list = (
     .select("order_id")
 )
 
-duplicate_records = (
-    valid_df
+duplicate_order_records_df = (
+    valid_orders_df
     .join(
         duplicate_order_id_list,
         on="order_id",
@@ -127,7 +127,7 @@ duplicate_records = (
     .orderBy("order_id", "order_time")
 )
 
-duplicate_records.show(
+duplicate_order_records_df.show(
     100,
     truncate=False
 )
@@ -135,9 +135,9 @@ duplicate_records.show(
 
 print("\n===== SUMMARY =====")
 
-print(f"Bronze records                : {bronze_count}")
-print(f"Valid records                 : {valid_count}")
-print(f"Invalid records               : {invalid_count}")
+print(f"Bronze records                : {bronze_record_count}")
+print(f"Valid records                 : {valid_order_count}")
+print(f"Invalid records               : {invalid_order_count}")
 print(f"Distinct valid order IDs      : {distinct_order_ids}")
 print(f"Records removed by dedup      : {records_removed}")
 

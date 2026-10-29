@@ -8,8 +8,8 @@ from config.settings import KAFKA_BOOTSTRAP_SERVERS
 from config.settings import KAFKA_TOPIC
 
 
-def read_stream() -> DataFrame:
-    """Create a streaming DataFrame subscribed to the configured Kafka topic.
+def read_kafka_orders() -> DataFrame:
+    """Create a streaming DataFrame subscribed to the configured orders topic.
 
     Returns:
         DataFrame: Kafka source rows, including key, value, topic, and offset metadata.
@@ -17,7 +17,7 @@ def read_stream() -> DataFrame:
 
     spark = create_spark_session()
 
-    kafka_df = (
+    kafka_orders_df = (
         spark.readStream
         .format("kafka")
         .option(
@@ -31,4 +31,4 @@ def read_stream() -> DataFrame:
         .load()
     )
 
-    return kafka_df
+    return kafka_orders_df

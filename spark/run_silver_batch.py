@@ -38,16 +38,16 @@ def start_silver_batch():
 
     print("Reading Bronze data...")
 
-    bronze_df = (
+    bronze_orders_df = (
         spark.read
         .schema(order_schema)
         .format("parquet")
         .load(BRONZE_PATH)
     )
 
-    bronze_count = bronze_df.count()
+    bronze_record_count = bronze_orders_df.count()
 
-    print(f"Bronze record count: {bronze_count}")
+    print(f"Bronze record count: {bronze_record_count}")
 
     # ---------------------------------------------------------
     # Data quality validation
@@ -55,13 +55,13 @@ def start_silver_batch():
 
     print("Running data-quality validation...")
 
-    valid_df, invalid_df = validate_orders(bronze_df)
+    valid_orders_df, invalid_orders_df = validate_orders(bronze_orders_df)
 
-    valid_count = valid_df.count()
-    invalid_count = invalid_df.count()
+    valid_order_count = valid_orders_df.count()
+    invalid_order_count = invalid_orders_df.count()
 
-    print(f"Valid records: {valid_count}")
-    print(f"Invalid records: {invalid_count}")
+    print(f"Valid records: {valid_order_count}")
+    print(f"Invalid records: {invalid_order_count}")
 
     # ---------------------------------------------------------
     # Silver transformation
@@ -69,11 +69,11 @@ def start_silver_batch():
 
     print("Transforming Silver data...")
 
-    silver_df = transform_orders(valid_df)
+    silver_orders_df = transform_orders(valid_orders_df)
 
-    silver_count = silver_df.count()
+    silver_order_count = silver_orders_df.count()
 
-    print(f"Silver record count: {silver_count}")
+    print(f"Silver record count: {silver_order_count}")
 
     # ---------------------------------------------------------
     # Silver output
@@ -84,7 +84,7 @@ def start_silver_batch():
     os.makedirs(SILVER_PATH, exist_ok=True)
 
     (
-        silver_df.write
+        silver_orders_df.write
         .mode("overwrite")
         .format("parquet")
         .save(SILVER_PATH)
@@ -96,14 +96,14 @@ def start_silver_batch():
     # Quarantine output
     # ---------------------------------------------------------
 
-    if invalid_count > 0:
+    if invalid_order_count > 0:
 
         print("Preparing Quarantine output directory...")
 
         os.makedirs(QUARANTINE_PATH, exist_ok=True)
 
         (
-            invalid_df.write
+            invalid_orders_df.write
             .mode("overwrite")
             .format("parquet")
             .save(QUARANTINE_PATH)

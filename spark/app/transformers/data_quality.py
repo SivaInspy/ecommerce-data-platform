@@ -6,11 +6,11 @@ from pyspark.sql.functions import col
 from pyspark.sql.functions import when
 
 
-def validate_orders(df: DataFrame):
+def validate_orders(orders_df: DataFrame):
     """Classify orders using the first failing required-field/price rule.
 
     Args:
-        df: DataFrame conforming to the Bronze order schema.
+        orders_df: DataFrame conforming to the Bronze order schema.
 
     Returns:
         tuple[DataFrame, DataFrame]: Valid rows without ``error_reason`` and
@@ -20,7 +20,7 @@ def validate_orders(df: DataFrame):
 
     # Chained when clauses intentionally report only the first failure per row.
     validated_df = (
-        df
+        orders_df
         .withColumn(
             "error_reason",
             when(
@@ -47,7 +47,7 @@ def validate_orders(df: DataFrame):
         )
     )
 
-    valid_df = (
+    valid_orders_df = (
         validated_df
         .filter(
             col("error_reason").isNull()
@@ -55,7 +55,7 @@ def validate_orders(df: DataFrame):
         .drop("error_reason")
     )
 
-    invalid_df = (
+    invalid_orders_df = (
         validated_df
         .filter(
             col("error_reason").isNotNull()
@@ -65,4 +65,4 @@ def validate_orders(df: DataFrame):
         )
     )
 
-    return valid_df, invalid_df
+    return valid_orders_df, invalid_orders_df

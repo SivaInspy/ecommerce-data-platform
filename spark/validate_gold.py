@@ -15,27 +15,27 @@ spark = (
 spark.sparkContext.setLogLevel("ERROR")
 
 
-def validate_dataset(name):
+def validate_dataset(dataset_name):
     """Display one Gold dataset's schema, rows, and record count.
 
     Args:
-        name: Dataset directory under ``GOLD_PATH``.
+        dataset_name: Dataset directory under ``GOLD_PATH``.
     """
-    path = f"{GOLD_PATH}/{name}"
+    dataset_path = f"{GOLD_PATH}/{dataset_name}"
 
     print("\n" + "=" * 60)
-    print(f"DATASET: {name}")
+    print(f"DATASET: {dataset_name}")
     print("=" * 60)
 
-    df = spark.read.parquet(path)
+    gold_dataset_df = spark.read.parquet(dataset_path)
 
     print("\nSchema:")
-    df.printSchema()
+    gold_dataset_df.printSchema()
 
     print("\nData:")
-    df.show(truncate=False)
+    gold_dataset_df.show(truncate=False)
 
-    print(f"Record count: {df.count()}")
+    print(f"Record count: {gold_dataset_df.count()}")
 
 
 datasets = [
