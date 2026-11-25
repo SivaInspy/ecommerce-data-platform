@@ -1,0 +1,98 @@
+"""Batch job that materializes analytical Gold datasets from Silver orders."""
+
+from pyspark.sql import SparkSession
+
+from app.schemas.order_schema import silver_order_schema
+
+from app.transformers.gold_transformer import revenue_by_category
+from app.transformers.gold_transformer import revenue_by_city
+from app.transformers.gold_transformer import overall_metrics
+from app.transformers.gold_transformer import sales_trend
+
+from config.settings import SILVER_PATH
+
+
+# Gold output root is relative to the Spark process working directory.
+GOLD_PATH = "gold"
+
+
+def start_gold_job():
+    """Read Silver orders, compute four aggregates, and overwrite Gold Parquet.
+
+    Creates category, city, overall-metric, and daily-trend datasets under
+    ``GOLD_PATH``. The Spark session is stopped after the writes complete.
+    """
+
+    spark = (
+        SparkSession.builder
+        .appName("ECommerceGold")
+        .master("local[*]")
+        .getOrCreate()
+    )
+
+    spark.sparkContext.setLogLevel("ERROR")
+
+    print("Reading Silver data...")
+
+    silver_orders_df = (
+        spark.read
+        .schema(silver_order_schema)
+        .format("parquet")
+        .load(SILVER_PATH)
+    )
+
+    print(f"Silver record count: {silver_orders_df.count()}")
+
+    print("\nGenerating revenue by category...")
+
+    category_revenue_df = revenue_by_category(silver_orders_df)
+
+    print("\nGenerating revenue by city...")
+
+    city_revenue_df = revenue_by_city(silver_orders_df)
+
+    print("\nGenerating overall metrics...")
+
+    overall_metrics_df = overall_metrics(silver_orders_df)
+
+    print("\nGenerating sales trend...")
+
+    daily_sales_trend_df = sales_trend(silver_orders_df)
+
+    print("\n===== REVENUE BY CATEGORY =====")
+    category_revenue_df.show(truncate=False)
+
+    print("\n===== REVENUE BY CITY =====")
+    city_revenue_df.show(truncate=False)
+
+    print("\n===== OVERALL METRICS =====")
+    overall_metrics_df.show(truncate=False)
+
+    print("\n===== SALES TREND =====")
+    daily_sales_trend_df.show(truncate=False)
+
+    print("\nWriting Gold datasets...")
+
+    category_revenue_df.write \
+        .mode("overwrite") \
+        .format("parquet") \
+        .save(f"{GOLD_PATH}/revenue_by_category")
+
+    city_revenue_df.write \
+        .mode("overwrite") \
+        .format("parquet") \
+        .save(f"{GOLD_PATH}/revenue_by_city")
+
+    overall_metrics_df.write \
+        .mode("overwrite") \
+        .format("parquet") \
+        .save(f"{GOLD_PATH}/overall_metrics")
+
+    daily_sales_trend_df.write \
+        .mode("overwrite") \
+        .format("parquet") \
+        .save(f"{GOLD_PATH}/sales_trend")
+
+    print("Gold processing completed successfully.")
+
+    spark.stop()

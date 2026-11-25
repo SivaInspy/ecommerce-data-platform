@@ -1,0 +1,43 @@
+# Python virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Spark output
+spark/bronze/
+spark/silver/
+spark/gold/
+spark/checkpoint/
+spark/quarantine/
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+
+# Checkpoint directories
+spark/checkpoint_bronze/
+spark/checkpoint_silver/
+spark/checkpoint_gold/
+
+# Airflow
+airflow/logs/
+airflow/airflow.db
+airflow/standalone_admin_password.txt
+airflow/__pycache__/

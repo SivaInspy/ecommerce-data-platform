@@ -1,0 +1,11 @@
+product_id,product_name,category,price
+P1001,iPhone 16,Mobile,79999
+P1002,Samsung Galaxy S25,Mobile,69999
+P1003,MacBook Air M4,Laptop,124999
+P1004,Dell XPS 15,Laptop,154999
+P1005,Sony WH-1000XM5,Accessories,24999
+P1006,AirPods Pro,Accessories,24999
+P1007,Apple Watch,Smart Watch,45999
+P1008,Samsung Smart TV,Electronics,64999
+P1009,LG OLED TV,Electronics,129999
+P1010,Nikon DSLR,Camera,79999
